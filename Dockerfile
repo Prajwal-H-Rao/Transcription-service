@@ -19,5 +19,7 @@ RUN mkdir models && \
     wget -O models/ggml-base.en.bin "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.en.bin" && \
     chmod 644 models/ggml-base.bin
 
+RUN yes | npx whisper-node download
+
 EXPOSE 4000
 CMD ["node", "server.js"]
