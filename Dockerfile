@@ -10,6 +10,13 @@ RUN apt-get update && apt-get install -y \
     cmake
 RUN npm install
 
+# Remove old cmake and install a newer version
+RUN apt-get remove -y cmake && \
+    wget https://github.com/Kitware/CMake/releases/download/v3.22.0/cmake-3.22.0-linux-x86_64.sh && \
+    chmod +x cmake-3.22.0-linux-x86_64.sh && \
+    ./cmake-3.22.0-linux-x86_64.sh --skip-license --prefix=/usr/local && \
+    rm cmake-3.22.0-linux-x86_64.sh
+
 # Clone and build whisper.cpp dependency
 RUN git clone https://github.com/ggerganov/whisper.cpp.git && \
     cd whisper.cpp && \
