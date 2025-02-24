@@ -74,5 +74,5 @@ app.post('/transcribe', upload.single('audio'), async (req, res) => {
 });
 
 app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
-});
+      console.log(`The server is running at:${port}`);
+    });
