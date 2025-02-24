@@ -7,6 +7,7 @@ const cors =require('cors')
 
 const app = express();
 const port = process.env.PORT || 4000;
+const modelPath = process.env.MODEL_PATH
 app.use(cors())
 // Setup upload folder
 const uploadDir = path.join(__dirname, 'uploads');
@@ -29,7 +30,7 @@ app.post('/transcribe', upload.single('audio'), async (req, res) => {
 
         const filePath = req.file.path;
         const options = {
-            modelName: "base",
+            modelPath,
             whisperOptions: {
                 language: 'auto',
                 gen_file_txt: false,
