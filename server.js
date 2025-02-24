@@ -2,9 +2,8 @@ const express = require('express');
 const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
-const os = require('os');
-// Removed: const { whisper } = require("whisper-node");
-const { execSync } = require('child_process'); // added for calling whisper.cpp
+const os = require('os'); // added for temporary directory
+const { whisper } = require("whisper-node");
 const cors = require('cors');
 
 const app = express();
@@ -26,12 +25,23 @@ app.post('/transcribe', upload.single('audio'), async (req, res) => {
         const tempFilePath = path.join(os.tmpdir(), Date.now() + '-' + req.file.originalname);
         fs.writeFileSync(tempFilePath, req.file.buffer);
         
-        // Use whisper.cpp binary to perform transcription.
-        const cmd = `whisper ${tempFilePath} --model ./models/ggml-base.en.bin --language auto --print`;
-        const transcript = execSync(cmd, { encoding: 'utf-8' }).trim();
+        const options = {
+            modelName: "base",
+            whisperOptions: {
+                language: 'auto',
+                gen_file_txt: false,
+            }
+        };
+
+        // Process audio file with whisper
+        const transcript = await whisper(tempFilePath, options);
+        if (!transcript || !Array.isArray(transcript)) {
+            return res.status(500).json({ error: "'base.en' model not found! Run 'npx whisper-node download base.en'" });
+        }
+        const transcriptStr = transcript.map(item => item.speech).join(' ');
 
         // Directly send the transcript as JSON response
-        res.json({ transcription: transcript });
+        res.json({ transcription: transcriptStr });
 
         // Delete the temporary file
         fs.unlink(tempFilePath, unlinkErr => {
