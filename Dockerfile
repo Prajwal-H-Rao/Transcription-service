@@ -10,7 +10,7 @@ COPY . .
 RUN apk add --no-cache build-base cmake git wget && \
     git clone https://github.com/ggerganov/whisper.cpp.git && \
     cd whisper.cpp && \
-    make && cp /app/bin/whisper-cli /usr/local/bin/whisper
+    make
 
 # Create models directory and download model
 RUN mkdir models && \
