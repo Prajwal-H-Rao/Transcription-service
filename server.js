@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const multer = require('multer');
 const fs = require('fs');
@@ -7,7 +8,7 @@ const cors =require('cors')
 
 const app = express();
 const port = process.env.PORT || 4000;
-const modelPath = process.env.MODEL_PATH
+const modelPath = process.env.MODEL_PATH || '/app/whisper.cpp/models/ggml-base.en.bin';
 app.use(cors())
 // Setup upload folder
 const uploadDir = path.join(__dirname, 'uploads');
@@ -25,33 +26,50 @@ const upload = multer({ storage });
 
 // Endpoint to get audio file and respond with transcript text file
 app.post('/transcribe', upload.single('audio'), async (req, res) => {
+    const filePath = req.file?.path;
+    
     try {
         if (!req.file) return res.status(400).send('No file uploaded.');
-
-        const filePath = req.file.path;
-        const options = {
-            modelPath,
+        
+        console.log('Using model path:', modelPath);
+        
+        const transcript = await whisper(filePath, {
+            modelPath: modelPath,
             whisperOptions: {
-                language: 'auto',
-                gen_file_txt: false,
+                language: 'en',
             }
-        };
-
-        // Process audio file with whisper
-        const transcript = await whisper(filePath, options);
-        // Convert transcript array to string if necessary
-        const transcriptStr = transcript.map(item => item.speech).join(' ');
-
-        // Directly send the transcript as JSON response instead of writing to a text file
-        res.json({ transcription: transcriptStr });
-
-        // Delete the audio file
-        fs.unlink(filePath, unlinkErr => {
-            if (unlinkErr) console.error("Failed to delete audio file", unlinkErr);
         });
+        
+        if (!transcript || !Array.isArray(transcript)) {
+            throw new Error('Transcription failed - invalid response');
+        }
+
+        const transcriptStr = transcript.map(item => item.speech).join(' ');
+        
+        // Send response first
+        res.json({ transcription: transcriptStr });
+        
+        // Then delete the file
+        try {
+            await fs.promises.unlink(filePath);
+            console.log(`Successfully deleted: ${filePath}`);
+        } catch (deleteError) {
+            console.error(`Failed to delete audio file ${filePath}:`, deleteError);
+        }
+        
     } catch (error) {
-        console.error(error);
-        res.status(500).send("Transcription failed.");
+        // If there's an error, try to clean up the file before sending error response
+        if (filePath) {
+            try {
+                await fs.promises.unlink(filePath);
+                console.log(`Cleaned up file after error: ${filePath}`);
+            } catch (deleteError) {
+                console.error('Failed to delete file after error:', deleteError);
+            }
+        }
+        
+        console.error('Transcription error:', error);
+        res.status(500).json({ error: error.message || "Transcription failed." });
     }
 });
 
