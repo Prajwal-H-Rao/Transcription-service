@@ -1,33 +1,13 @@
-FROM node:16-buster
+FROM node:14-alpine
 
-WORKDIR /home/prajw/whisper-node-server
+WORKDIR /app
 
-# Copy package files and install Node.js dependencies
 COPY package*.json ./
-RUN apt-get update && apt-get install -y \
-    git \
-    build-essential \
-    cmake
 RUN npm install
-
-# Remove old cmake and install a newer version
-RUN apt-get remove -y cmake && \
-    wget https://github.com/Kitware/CMake/releases/download/v3.22.0/cmake-3.22.0-linux-x86_64.sh && \
-    chmod +x cmake-3.22.0-linux-x86_64.sh && \
-    ./cmake-3.22.0-linux-x86_64.sh --skip-license --prefix=/usr/local && \
-    rm cmake-3.22.0-linux-x86_64.sh
-
-# Clone and build whisper.cpp dependency with examples disabled and filesystem flag
-RUN git clone https://github.com/ggerganov/whisper.cpp.git && \
-    cd whisper.cpp && \
-    mkdir build && cd build && \
-    cmake .. -DBUILD_EXAMPLES=OFF -DCMAKE_EXE_LINKER_FLAGS="-lstdc++fs" && make
-
-# Copy remaining project files
 COPY . .
 
-# Expose the port (adjust if needed)
-EXPOSE 4000
+# Install the 'base.en' model during image build
+RUN npx whisper-node download base
 
-# Start the server
-CMD ["node", "server.js"]
+EXPOSE 4000
+CMD ["node", "start.js"]
