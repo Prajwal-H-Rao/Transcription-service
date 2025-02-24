@@ -17,11 +17,11 @@ RUN apt-get remove -y cmake && \
     ./cmake-3.22.0-linux-x86_64.sh --skip-license --prefix=/usr/local && \
     rm cmake-3.22.0-linux-x86_64.sh
 
-# Clone and build whisper.cpp dependency with filesystem flag
+# Clone and build whisper.cpp dependency with examples disabled and filesystem flag
 RUN git clone https://github.com/ggerganov/whisper.cpp.git && \
     cd whisper.cpp && \
     mkdir build && cd build && \
-    cmake .. -DCMAKE_EXE_LINKER_FLAGS="-lstdc++fs" && make
+    cmake .. -DBUILD_EXAMPLES=OFF -DCMAKE_EXE_LINKER_FLAGS="-lstdc++fs" && make
 
 # Copy remaining project files
 COPY . .
