@@ -1,25 +1,15 @@
-FROM node:18-alpine
-
+FROM node:16-alpine
 WORKDIR /app
 
-# Copy package files and install dependencies
+// Copy package files and install dependencies (whisper model installs here via postinstall)
 COPY package*.json ./
 RUN npm install
+
+// Copy the rest of the application code
 COPY . .
 
-# # Install build tools, compile whisper.cpp, and copy the whisper-cli binary
-# RUN apk add --no-cache build-base cmake git wget && \
-#     git clone https://github.com/ggerganov/whisper.cpp.git && \
-#     cd whisper.cpp && \
-#     make && \
-#     cp build/whisper-cli /usr/local/bin/whisper
-
-# Download the model file and update its permissions
-RUN mkdir models && \
-    wget -O models/ggml-base.en.bin "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.en.bin" && \
-    chmod 644 models/ggml-base.bin
-
-RUN yes | npx whisper-node download
-
+// Expose the port used by the application
 EXPOSE 4000
+
+// Start the server
 CMD ["node", "server.js"]
