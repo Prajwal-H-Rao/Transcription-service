@@ -20,7 +20,7 @@ RUN git clone https://github.com/ggerganov/whisper.cpp.git && \
     cd whisper.cpp && \
     cmake . && \
     make && \
-    bash ./models/download-ggml-model.sh base.en
+    bash ./models/download-ggml-model.sh tiny
 
 # Copy the rest of the application code
 COPY . .
