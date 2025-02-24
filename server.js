@@ -29,7 +29,7 @@ app.post('/transcribe', upload.single('audio'), async (req, res) => {
 
         const filePath = req.file.path;
         const options = {
-            modelName: "base.en",
+            modelName: "base",
             whisperOptions: {
                 language: 'auto',
                 gen_file_txt: false,
