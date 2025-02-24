@@ -18,8 +18,11 @@ RUN npm install
 # Copy the rest of the app's source code
 COPY . .
 
-# Download Whisper model (adjust model size as needed)
-RUN npx whisper-node download --model base
+# Ensure models directory exists
+RUN mkdir -p /app/models
+
+# Download Whisper model directly from the source
+RUN curl -L -o /app/models/ggml-base.bin https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.bin
 
 # Expose the port
 EXPOSE 3000
