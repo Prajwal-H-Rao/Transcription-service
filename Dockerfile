@@ -1,21 +1,28 @@
-FROM node:16-alpine
+# Use a Node.js base image
+FROM node:18
+
+# Set the working directory
 WORKDIR /app
 
-# Install build dependencies for compiling whisper.cpp
-RUN apk add --no-cache build-base make perl
+# Install dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    cmake \
+    ffmpeg \
+    && rm -rf /var/lib/apt/lists/*
 
-# Ensure non-interactive installation (CI mode)
-ENV CI=true
-
-# Copy package files and install dependencies (whisper model installs here via postinstall)
+# Copy package files and install dependencies
 COPY package*.json ./
 RUN npm install
 
-#Copy the rest of the application code
+# Copy the rest of the app's source code
 COPY . .
 
-# Expose the port used by the application
-EXPOSE 4000
+# Download Whisper model (adjust model size as needed)
+RUN npx whisper-node download --model base
 
-# Start the server
+# Expose the port
+EXPOSE 3000
+
+# Start the Node.js server
 CMD ["node", "server.js"]

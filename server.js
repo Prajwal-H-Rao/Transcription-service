@@ -7,7 +7,7 @@ const cors =require('cors')
 
 const app = express();
 const port = process.env.PORT || 4000;
-
+app.use(cors())
 // Setup upload folder
 const uploadDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
