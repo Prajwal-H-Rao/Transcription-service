@@ -16,7 +16,7 @@ COPY . .
 EXPOSE 4000
 
 # Install Whisper.cpp dependencies
-RUN apk add --no-cache git build-base cmake ffmpeg
+RUN apk add --no-cache git build-base cmake ffmpeg curl
 
 # Clone and build Whisper.cpp
 RUN git clone https://github.com/ggerganov/whisper.cpp.git && \
