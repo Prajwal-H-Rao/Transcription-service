@@ -15,7 +15,7 @@ app.post('/transcribe', upload.single('audio'), (req, res) => {
   if (!req.file) {
     return res.status(400).json({ error: 'No file uploaded' });
   }
-
+  console.log("trancribing");
   const whisperCliPath = path.resolve(__dirname, 'whisper.cpp/build/bin/whisper-cli');
   const modelPath = path.resolve(__dirname, 'models/ggml-tiny.en.bin');
   const audioFilePath = path.resolve(__dirname, req.file.path);
